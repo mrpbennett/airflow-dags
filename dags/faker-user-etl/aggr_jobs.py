@@ -104,6 +104,3 @@ with DAG(
         task_id="aggregate_job_detail",
         python_callable=aggr_jobdetail_job,
     )
-
-    # If these can run in parallel, leave them unchained:
-    [aggregate_address, aggregate_device, aggregate_contact, aggregate_jobdetail]

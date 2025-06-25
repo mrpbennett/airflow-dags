@@ -5,7 +5,7 @@ description = ""
 authors = [{ name = "mrpbennett", email = "pbennett.uk@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = ["psycopg2-binary (>=2.9.10,<3.0.0)"]
 
 
 [build-system]
