@@ -4,89 +4,13 @@ import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-
-
-def aggr_address_job():
-    hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-    conn = hook.get_conn()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        INSERT INTO aggr.users_address (
-          uuid, street, city, state, zip_code, country, created_at
-        )
-        SELECT
-          uuid, street, city, state, zip_code, country, created_at
-        FROM fact.users
-        WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
-    """
-    )
-    result = cursor.fetchone()[0]
-    print(f"Address aggregation job completed successfully. Rows affected: {result}")
-
-
-def aggr_device_job():
-    hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-    conn = hook.get_conn()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        INSERT INTO aggr.users_device (
-          uuid, ip, user_agent, mac_address, token, created_at
-        )
-        SELECT
-          uuid, ip, user_agent, mac_address, token, created_at
-        FROM fact.users
-        WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
-    """
-    )
-    result = cursor.fetchone()[0]
-    print(f"Device aggregation job completed successfully. Rows affected: {result}")
-
-
-def aggr_contact_job():
-    hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-    conn = hook.get_conn()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        INSERT INTO aggr.users_contact (
-          uuid, first_name, last_name, email, phone_number, created_at
-        )
-        SELECT
-          uuid, first_name, last_name, email, phone_number, created_at
-        FROM fact.users
-        WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
-    """
-    )
-    result = cursor.fetchone()[0]
-    print(f"Contact aggregation job completed successfully. Rows affected: {result}")
-
-
-def aggr_jobdetail_job():
-    hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-    conn = hook.get_conn()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        INSERT INTO aggr.users_job (
-          uuid, job_title, job_area, job_type, created_at
-        )
-        SELECT
-          uuid, job_title, job_area, job_type, created_at
-        FROM fact.users
-        WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
-    """
-    )
-    result = cursor.fetchone()[0]
-    print(f"Job-detail aggregation job completed successfully. Rows affected: {result}")
-
+from airflow.sdk import dag, task
 
 # === DAG definition ===
 local_tz = pendulum.timezone("Europe/London")
 
 
-with DAG(
+@dag(
     dag_id="user_data_aggregation",
     description="Breaking down fact user data into aggregated tables",
     default_args={
@@ -100,26 +24,95 @@ with DAG(
     catchup=False,
     max_active_runs=1,
     tags=["aggregation", "daily"],
-) as dag:
+)
+def faker_aggr_jobs():
 
-    aggregate_address = PythonOperator(
-        task_id="aggregate_address",
-        python_callable=aggr_address_job,
-    )
+    @task()
+    def aggr_address_job():
+        hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+        conn = hook.get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+          INSERT INTO aggr.users_address (
+            uuid, street, city, state, zip_code, country, created_at
+          )
+          SELECT
+            uuid, street, city, state, zip_code, country, created_at
+          FROM fact.users
+          WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
+      """
+        )
+        result = cursor.fetchone()[0]
+        print(
+            f"Address aggregation job completed successfully. Rows affected: {result}"
+        )
 
-    aggregate_device = PythonOperator(
-        task_id="aggregate_device",
-        python_callable=aggr_device_job,
-    )
+    @task()
+    def aggr_device_job():
+        hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+        conn = hook.get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+          INSERT INTO aggr.users_device (
+            uuid, ip, user_agent, mac_address, token, created_at
+          )
+          SELECT
+            uuid, ip, user_agent, mac_address, token, created_at
+          FROM fact.users
+          WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
+      """
+        )
+        result = cursor.fetchone()[0]
+        print(f"Device aggregation job completed successfully. Rows affected: {result}")
 
-    aggregate_contact = PythonOperator(
-        task_id="aggregate_contact",
-        python_callable=aggr_contact_job,
-    )
+    @task()
+    def aggr_contact_job():
+        hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+        conn = hook.get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+          INSERT INTO aggr.users_contact (
+            uuid, first_name, last_name, email, phone_number, created_at
+          )
+          SELECT
+            uuid, first_name, last_name, email, phone_number, created_at
+          FROM fact.users
+          WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
+      """
+        )
+        result = cursor.fetchone()[0]
+        print(
+            f"Contact aggregation job completed successfully. Rows affected: {result}"
+        )
 
-    aggregate_jobdetail = PythonOperator(
-        task_id="aggregate_job_detail",
-        python_callable=aggr_jobdetail_job,
-    )
+    @task()
+    def aggr_jobdetail_job():
+        hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+        conn = hook.get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+          INSERT INTO aggr.users_job (
+            uuid, job_title, job_area, job_type, created_at
+          )
+          SELECT
+            uuid, job_title, job_area, job_type, created_at
+          FROM fact.users
+          WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
+      """
+        )
+        result = cursor.fetchone()[0]
+        print(
+            f"Job-detail aggregation job completed successfully. Rows affected: {result}"
+        )
 
-    aggr_address_job >> aggregate_device >> aggregate_contact >> aggregate_jobdetail
+        aggr_address_job()
+        aggr_device_job()
+        aggr_contact_job()
+        aggr_jobdetail_job()
+
+
+faker_aggr_jobs()

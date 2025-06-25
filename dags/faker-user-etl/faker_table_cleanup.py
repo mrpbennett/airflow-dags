@@ -1,8 +1,22 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.sdk import dag, task
 
 
+@dag(
+    dag_id="faker_table_cleanup",
+    description="Removing old data from faker tables",
+    default_args={
+        "owner": "airflow",
+        "start_date": "2025-01-01",
+        "retries": 1,
+        "retry_delay": 300,  # 5 minutes
+    },
+    schedule_interval="0 3 * * *",  # daily at 03:00
+    catchup=False,
+    max_active_runs=1,
+    tags=["cleanup", "daily"],
+)
+@task()
 def cleanup_faker_tables():
     hook = PostgresHook(postgres_conn_id="cnpg_cluster")
     conn = hook.get_conn()
@@ -29,25 +43,4 @@ def cleanup_faker_tables():
     print(f"Address aggregation job completed successfully. Rows affected: {result}")
 
 
-# == DAG Definition ===
-
-
-with DAG(
-    dag_id="faker_table_cleanup",
-    description="Removing old data from faker tables",
-    default_args={
-        "owner": "airflow",
-        "start_date": "2025-01-01",
-        "retries": 1,
-        "retry_delay": 300,  # 5 minutes
-    },
-    schedule_interval="0 3 * * *",  # daily at 03:00
-    catchup=False,
-    max_active_runs=1,
-    tags=["cleanup", "daily"],
-) as dag:
-
-    cleanup_task = PythonOperator(
-        task_id="cleanup_faker_tables",
-        python_callable=cleanup_faker_tables,
-    )
+cleanup_faker_tables()
