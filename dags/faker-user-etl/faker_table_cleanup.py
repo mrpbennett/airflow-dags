@@ -1,11 +1,13 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-
-from src.utils.cnpg_contextmgr import query_db
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 
 def cleanup_faker_tables():
-    query = """
+    hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+    conn = hook.get_conn()
+    cursor = conn.cursor()
+    cursor.execute("""
         DELETE from fact.users
         WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '7 days';
             
@@ -20,12 +22,9 @@ def cleanup_faker_tables():
             
         DELETE from aggr.users_job
         WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
-    """
-    try:
-        with query_db(query) as curr:
-            print("Cleanup aggregation job completed successfully.")
-    except Exception as err:
-        raise err
+    """)
+    result = cursor.fetchone()[0]
+    print(f"Address aggregation job completed successfully. Rows affected: {result}")
 
 
 # == DAG Definition ===
