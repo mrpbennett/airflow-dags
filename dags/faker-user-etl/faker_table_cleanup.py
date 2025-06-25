@@ -7,7 +7,8 @@ def cleanup_faker_tables():
     hook = PostgresHook(postgres_conn_id="cnpg_cluster")
     conn = hook.get_conn()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         DELETE from fact.users
         WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '7 days';
             
@@ -22,7 +23,8 @@ def cleanup_faker_tables():
             
         DELETE from aggr.users_job
         WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
-    """)
+    """
+    )
     result = cursor.fetchone()[0]
     print(f"Address aggregation job completed successfully. Rows affected: {result}")
 
@@ -42,7 +44,7 @@ with DAG(
     schedule_interval="0 3 * * *",  # daily at 03:00
     catchup=False,
     max_active_runs=1,
-    tags=["cleanup"],
+    tags=["cleanup", "daily"],
 ) as dag:
 
     cleanup_task = PythonOperator(

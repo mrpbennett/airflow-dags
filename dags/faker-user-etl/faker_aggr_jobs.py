@@ -10,7 +10,8 @@ def aggr_address_job():
     hook = PostgresHook(postgres_conn_id="cnpg_cluster")
     conn = hook.get_conn()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO aggr.users_address (
           uuid, street, city, state, zip_code, country, created_at
         )
@@ -18,7 +19,8 @@ def aggr_address_job():
           uuid, street, city, state, zip_code, country, created_at
         FROM fact.users
         WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
-    """)
+    """
+    )
     result = cursor.fetchone()[0]
     print(f"Address aggregation job completed successfully. Rows affected: {result}")
 
@@ -27,7 +29,8 @@ def aggr_device_job():
     hook = PostgresHook(postgres_conn_id="cnpg_cluster")
     conn = hook.get_conn()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO aggr.users_device (
           uuid, ip, user_agent, mac_address, token, created_at
         )
@@ -35,7 +38,8 @@ def aggr_device_job():
           uuid, ip, user_agent, mac_address, token, created_at
         FROM fact.users
         WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
-    """)
+    """
+    )
     result = cursor.fetchone()[0]
     print(f"Device aggregation job completed successfully. Rows affected: {result}")
 
@@ -44,7 +48,8 @@ def aggr_contact_job():
     hook = PostgresHook(postgres_conn_id="cnpg_cluster")
     conn = hook.get_conn()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO aggr.users_contact (
           uuid, first_name, last_name, email, phone_number, created_at
         )
@@ -52,7 +57,8 @@ def aggr_contact_job():
           uuid, first_name, last_name, email, phone_number, created_at
         FROM fact.users
         WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
-    """)
+    """
+    )
     result = cursor.fetchone()[0]
     print(f"Contact aggregation job completed successfully. Rows affected: {result}")
 
@@ -61,7 +67,8 @@ def aggr_jobdetail_job():
     hook = PostgresHook(postgres_conn_id="cnpg_cluster")
     conn = hook.get_conn()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO aggr.users_job (
           uuid, job_title, job_area, job_type, created_at
         )
@@ -69,7 +76,8 @@ def aggr_jobdetail_job():
           uuid, job_title, job_area, job_type, created_at
         FROM fact.users
         WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
-    """)
+    """
+    )
     result = cursor.fetchone()[0]
     print(f"Job-detail aggregation job completed successfully. Rows affected: {result}")
 
@@ -92,7 +100,6 @@ with DAG(
     catchup=False,
     max_active_runs=1,
     tags=["aggregation", "daily"],
-    timezone="Europe/London",
 ) as dag:
 
     aggregate_address = PythonOperator(
