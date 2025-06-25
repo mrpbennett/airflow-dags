@@ -5,7 +5,7 @@ import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from src.airflow_utils.cnpg_contextmgr import query_db
+from utils.cnpg_contextmgr import query_db
 
 
 def aggr_address_job():
