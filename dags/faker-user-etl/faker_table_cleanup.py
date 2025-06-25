@@ -31,16 +31,16 @@ def cleanup_faker_tables():
 
 # == DAG Definition ===
 
-default_args = {
-    "owner": "airflow",
-    "start_date": "2025-01-01",
-    "retries": 1,
-    "retry_delay": 300,  # 5 minutes
-}
 
 with DAG(
     dag_id="faker_table_cleanup",
-    default_args=default_args,
+    description="Removing old data from faker tables",
+    default_args={
+        "owner": "airflow",
+        "start_date": "2025-01-01",
+        "retries": 1,
+        "retry_delay": 300,  # 5 minutes
+    },
     schedule_interval="0 3 * * *",  # daily at 03:00
     catchup=False,
     max_active_runs=1,

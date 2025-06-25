@@ -85,17 +85,17 @@ def aggr_jobdetail_job():
 # === DAG definition ===
 local_tz = pendulum.timezone("Europe/London")
 
-default_args = {
-    "owner": "data-eng",
-    "depends_on_past": False,
-    "start_date": local_tz.convert(datetime(2025, 6, 26, 2, 0)),
-    "retries": 1,
-    "retry_delay": timedelta(minutes=10),
-}
 
 with DAG(
     dag_id="user_data_aggregation",
-    default_args=default_args,
+    description="Breaking down fact user data into aggregated tables",
+    default_args={
+        "owner": "data-eng",
+        "depends_on_past": False,
+        "start_date": local_tz.convert(datetime(2025, 6, 26, 2, 0)),
+        "retries": 1,
+        "retry_delay": timedelta(minutes=10),
+    },
     schedule_interval="0 2 * * *",  # daily at 02:00
     catchup=False,
     max_active_runs=1,
@@ -121,3 +121,5 @@ with DAG(
         task_id="aggregate_job_detail",
         python_callable=aggr_jobdetail_job,
     )
+
+    aggr_address_job >> aggregate_device >> aggregate_contact >> aggregate_jobdetail
