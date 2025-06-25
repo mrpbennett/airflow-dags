@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 
 import pendulum
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.sdk import dag, task
 
@@ -26,14 +24,9 @@ local_tz = pendulum.timezone("Europe/London")
     tags=["aggregation", "daily"],
 )
 def faker_aggr_jobs():
-
-    @task()
-    def aggr_address_job():
-        hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-        conn = hook.get_conn()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
+    @task
+    def aggr_user_address_job():
+        query = """
           INSERT INTO aggr.users_address (
             uuid, street, city, state, zip_code, country, created_at
           )
@@ -42,19 +35,19 @@ def faker_aggr_jobs():
           FROM fact.users
           WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
       """
-        )
-        result = cursor.fetchone()[0]
-        print(
-            f"Address aggregation job completed successfully. Rows affected: {result}"
-        )
+        try:
+            hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during aggr_user_address_job aggregation: {e}")
+            return 1
 
-    @task()
-    def aggr_device_job():
-        hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-        conn = hook.get_conn()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
+    @task
+    def aggr_user_device_job():
+        query = """
           INSERT INTO aggr.users_device (
             uuid, ip, user_agent, mac_address, token, created_at
           )
@@ -63,17 +56,19 @@ def faker_aggr_jobs():
           FROM fact.users
           WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
       """
-        )
-        result = cursor.fetchone()[0]
-        print(f"Device aggregation job completed successfully. Rows affected: {result}")
+        try:
+            hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during aggr_user_device_job aggregation: {e}")
+            return 1
 
-    @task()
-    def aggr_contact_job():
-        hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-        conn = hook.get_conn()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
+    @task
+    def aggr_user_contact_job():
+        query = """
           INSERT INTO aggr.users_contact (
             uuid, first_name, last_name, email, phone_number, created_at
           )
@@ -82,19 +77,19 @@ def faker_aggr_jobs():
           FROM fact.users
           WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
       """
-        )
-        result = cursor.fetchone()[0]
-        print(
-            f"Contact aggregation job completed successfully. Rows affected: {result}"
-        )
+        try:
+            hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during aggr_user_contact_job aggregation: {e}")
+            return 1
 
-    @task()
-    def aggr_jobdetail_job():
-        hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-        conn = hook.get_conn()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
+    @task
+    def aggr_user_jobdetail_job():
+        query = """
           INSERT INTO aggr.users_job (
             uuid, job_title, job_area, job_type, created_at
           )
@@ -103,16 +98,22 @@ def faker_aggr_jobs():
           FROM fact.users
           WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
       """
-        )
-        result = cursor.fetchone()[0]
-        print(
-            f"Job-detail aggregation job completed successfully. Rows affected: {result}"
-        )
+        try:
+            hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during aggr_user_jobdetail_job aggregation: {e}")
+            return 1
 
-        aggr_address_job()
-        aggr_device_job()
-        aggr_contact_job()
-        aggr_jobdetail_job()
+    (
+        aggr_user_address_job()
+        >> aggr_user_device_job()
+        >> aggr_user_contact_job()
+        >> aggr_user_jobdetail_job()
+    )  # type: ignore
 
 
-faker_aggr_jobs()
+dag = faker_aggr_jobs()

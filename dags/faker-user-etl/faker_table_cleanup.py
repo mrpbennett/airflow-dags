@@ -16,31 +16,94 @@ from airflow.sdk import dag, task
     max_active_runs=1,
     tags=["cleanup", "daily"],
 )
-@task()
 def cleanup_faker_tables():
-    hook = PostgresHook(postgres_conn_id="cnpg_cluster")
-    conn = hook.get_conn()
-    cursor = conn.cursor()
-    cursor.execute(
+    @task
+    def cleanup_fact_users_table():
+        query = """
+            DELETE FROM fact.users
+            WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '7 days';
         """
-        DELETE from fact.users
-        WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '7 days';
-            
-        DELETE from aggr.users_address
-        WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
-            
-        DELETE from aggr.users_contact
-        WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
-            
-        DELETE from aggr.users_device
-        WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
-            
-        DELETE from aggr.users_job
-        WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
-    """
-    )
-    result = cursor.fetchone()[0]
-    print(f"Address aggregation job completed successfully. Rows affected: {result}")
+        try:
+            postgres_hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = postgres_hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during cleanup: {e}")
+            return 1
+
+    @task
+    def cleanup_aggr_users_address_table():
+        query = """
+            DELETE FROM aggr.users_address
+            WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
+        """
+        try:
+            postgres_hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = postgres_hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during cleanup: {e}")
+            return 1
+
+    @task
+    def cleanup_aggr_users_contact_table():
+        query = """
+            DELETE FROM aggr.users_contact
+            WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
+        """
+        try:
+            postgres_hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = postgres_hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during cleanup: {e}")
+            return 1
+
+    @task
+    def cleanup_aggr_users_device_table():
+        query = """
+            DELETE FROM aggr.users_device
+            WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
+        """
+        try:
+            postgres_hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = postgres_hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during cleanup: {e}")
+            return 1
+
+    @task
+    def cleanup_aggr_users_job_table():
+        query = """
+            DELETE FROM aggr.users_job
+            WHERE created_at::timestamp < CURRENT_DATE - INTERVAL '45 days';
+        """
+        try:
+            postgres_hook = PostgresHook(postgres_conn_id="cnpg_cluster")
+            conn = postgres_hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            return 0
+        except Exception as e:
+            print(f"Error during cleanup: {e}")
+            return 1
+
+    (
+        cleanup_fact_users_table()
+        >> cleanup_aggr_users_address_table()
+        >> cleanup_aggr_users_contact_table()
+        >> cleanup_aggr_users_device_table()
+        >> cleanup_aggr_users_job_table()
+    )  # type: ignore
 
 
-cleanup_faker_tables()
+dag = cleanup_faker_tables()
