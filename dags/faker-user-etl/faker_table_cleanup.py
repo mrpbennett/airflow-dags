@@ -1,5 +1,11 @@
+from datetime import datetime, timedelta
+
+import pendulum
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.sdk import dag, task
+
+# === DAG definition ===
+local_tz = pendulum.timezone("Europe/London")
 
 
 @dag(
@@ -7,11 +13,11 @@ from airflow.sdk import dag, task
     description="Removing old data from faker tables",
     default_args={
         "owner": "airflow",
-        "start_date": "2025-01-01",
-        "retries": 1,
-        "retry_delay": 300,  # 5 minutes
+        "start_date": local_tz.convert(datetime(2025, 1, 1)),
+        "retries": 3,
+        "retry_delay": timedelta(minutes=10),
     },
-    schedule_interval="0 3 * * *",  # daily at 03:00
+    schedule_interval="0 3 * * *",  # Daily at 3 AM
     catchup=False,
     max_active_runs=1,
     tags=["cleanup", "daily"],

@@ -9,16 +9,16 @@ local_tz = pendulum.timezone("Europe/London")
 
 
 @dag(
-    dag_id="user_data_aggregation",
+    dag_id="faker_user_aggregation",
     description="Breaking down fact user data into aggregated tables",
     default_args={
         "owner": "data-eng",
         "depends_on_past": False,
-        "start_date": local_tz.convert(datetime(2025, 6, 26, 2, 0)),
-        "retries": 1,
+        "start_date": local_tz.convert(datetime(2025, 6, 26)),
+        "retries": 3,
         "retry_delay": timedelta(minutes=10),
     },
-    schedule_interval="0 2 * * *",  # daily at 02:00
+    schedule_interval="0 2 * * *",  # Daily at 2 AM
     catchup=False,
     max_active_runs=1,
     tags=["aggregation", "daily"],
