@@ -17,7 +17,7 @@ local_tz = pendulum.timezone("Europe/London")
         "retries": 3,
         "retry_delay": timedelta(minutes=10),
     },
-    schedule_interval="0 3 * * *",  # Daily at 3 AM
+    schedule="0 3 * * *",  # Daily at 3 AM
     catchup=False,
     max_active_runs=1,
     tags=["cleanup", "daily"],

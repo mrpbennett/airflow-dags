@@ -4,8 +4,12 @@ version = "0.1.0"
 description = ""
 authors = [{ name = "mrpbennett", email = "pbennett.uk@gmail.com" }]
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = ["psycopg2-binary (>=2.9.10,<3.0.0)"]
+requires-python = ">=3.9, <3.13"
+dependencies = [
+    "psycopg2-binary (>=2.9.10,<3.0.0)",
+    "requests (>=2.32.5,<3.0.0)",
+    "apache-airflow (>=3.0.4,<4.0.0)",
+]
 
 
 [build-system]

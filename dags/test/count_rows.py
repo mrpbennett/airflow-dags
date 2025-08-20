@@ -26,7 +26,7 @@ def count_rows_in_table():
 with DAG(
     dag_id="example_row_count",
     default_args=default_args,
-    schedule_interval="*/30 * * * *",
+    schedule="*/30 * * * *",
     catchup=False,
 ) as dag:
 
