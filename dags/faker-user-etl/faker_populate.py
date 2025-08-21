@@ -1,4 +1,4 @@
-from json import load
+import json
 from requests.sessions import extract_cookies_to_jar
 from airflow.models import Variable
 from airflow.providers.postgres.hooks.postgres import PostgresHook
@@ -114,7 +114,7 @@ def faker_data_ingestion():
     def extract() -> pd.DataFrame:
         """Extract data from the Faker API and return it as a DataFrame."""
         logger.info("Starting data extraction from the Faker API.")
-        data = return_faker_data()
+        data = json.dumps(return_faker_data())
 
         # try:
         df = pd.read_json(data)
