@@ -116,7 +116,7 @@ def faker_data_ingestion():
         logger.info("Starting data extraction from the Faker API.")
         data = json.dumps(return_faker_data())
         print(json.dumps(data, indent=4))
-
+        df = pd.read_json(data)
         df = df.drop(columns=["sex", "phone"], errors="ignore")
         print(df.head(10))
 
