@@ -61,7 +61,7 @@ logger = logging.getLogger(__name__)
 
 
 def return_faker_data() -> list:
-    random_num: int = random.randint(1, 1000)
+    random_num: int = random.randint(1, 2)
     res = requests.get(f"http://192.168.7.52/api/users?count={random_num}")
     res.raise_for_status()
 
@@ -115,18 +115,7 @@ def faker_data_ingestion():
         """Extract data from the Faker API and return it as a DataFrame."""
         logger.info("Starting data extraction from the Faker API.")
         data = json.dumps(return_faker_data())
-
-        # try:
-        df = pd.read_json(data)
-        print("-- printing original df --")
-        print(df.head(5))
-        logger.info("Data successfully read into DataFrame.")
-        # except ValueError:
-        #     # if data is already a dict/list normalize it
-        #     logger.warning("Data is not JSON-formatted. Attempting normalization.")
-        #     df = pd.json_normalize(data)
-        #     print("-- normalization df -- ")
-        #     print(df.head(5))
+        print(json.dumps(data, indent=4))
 
         df = df.drop(columns=["sex", "phone"], errors="ignore")
         print(df.head(10))
