@@ -118,11 +118,15 @@ def faker_data_ingestion():
 
         try:
             df = pd.read_json(data)
+            print("-- printing original df --")
+            print(df.head(5))
             logger.info("Data successfully read into DataFrame.")
         except ValueError:
             # if data is already a dict/list normalize it
             logger.warning("Data is not JSON-formatted. Attempting normalization.")
             df = pd.json_normalize(data)
+            print("-- normalization df -- ")
+            print(df.head(5))
 
         df = df.drop(columns=["sex", "phone"], errors="ignore")
         print(df.head(10))
