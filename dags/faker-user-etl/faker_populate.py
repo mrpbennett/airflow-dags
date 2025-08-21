@@ -115,8 +115,18 @@ def faker_data_ingestion():
         """Extract data from the Faker API and return it as a DataFrame."""
         logger.info("Starting data extraction from the Faker API.")
         data = json.dumps(return_faker_data())
+
         df = pd.read_json(data)
         df = df.drop(columns=["sex", "phone"], errors="ignore")
+
+        logging.info("Renaming cols to conform to postgres NOT JavaScript")
+        df.rename(
+            columns={
+                "firstName": "first_name",
+                "lastName": "last_name",
+                "userAgent": "user_agent",
+            }
+        )
 
         return df
 
