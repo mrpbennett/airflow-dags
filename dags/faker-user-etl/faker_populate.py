@@ -7,7 +7,6 @@ import pendulum
 import random
 import requests
 import pandas as pd
-import numpy as np
 import hmac
 import hashlib
 from sqlalchemy import create_engine
@@ -130,8 +129,6 @@ def faker_data_ingestion():
             inplace=True,
         )
 
-        print(df.columns)
-
         return df
 
     @task()
@@ -170,16 +167,9 @@ def faker_data_ingestion():
                 f"DataFrame is missing required columns: {missing_columns}"
             )
 
+        # connect via uri
         pg_hook = PostgresHook(postgres_conn_id="cnpg")
-
-        try:
-            engine = pg_hook.get_sqlalchmey_engine()
-            logger.info("SQLAlchemy engine successfully obtained from PostgresHook.")
-        except AttributeError:
-            logger.warning(
-                "PostgresHook does not support get_sqlalchmey_engine. Falling back to create_engine."
-            )
-            engine = create_engine(pg_hook.get_uri())
+        engine = create_engine(pg_hook.get_uri())
 
         # Check if the schema and table exist
         try:
@@ -207,7 +197,9 @@ def faker_data_ingestion():
                 method="multi",
                 chunksize=1000,
             )
-            logger.info("Data successfully loaded into the PostgreSQL table: fakerjs.")
+            logger.info(
+                "Data successfully loaded into the PostgreSQL table: fact.users."
+            )
         except Exception as e:
             logger.error(f"Failed to load data into PostgreSQL: {e}")
             raise
