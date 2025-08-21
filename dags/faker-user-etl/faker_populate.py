@@ -125,6 +125,8 @@ def faker_data_ingestion():
             df = pd.json_normalize(data)
 
         df = df.drop(columns=["sex", "phone"], errors="ignore")
+        print(df.head(10))
+
         logger.info("DataFrame columns filtered. Returning DataFrame.")
         return df
 
