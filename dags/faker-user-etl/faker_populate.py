@@ -154,9 +154,9 @@ def faker_data_ingestion():
 
         required_columns = [
             "uuid",
-            "firstName",
+            "first_name",
             "lastName",
-            "email",
+            "last_name",
             "address",
             "state",
             "ip",
