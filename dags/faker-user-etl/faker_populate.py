@@ -126,7 +126,8 @@ def faker_data_ingestion():
                 "firstName": "first_name",
                 "lastName": "last_name",
                 "userAgent": "user_agent",
-            }
+            },
+            inplace=True,
         )
 
         print(df.columns)
