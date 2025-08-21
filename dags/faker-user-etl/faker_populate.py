@@ -61,7 +61,7 @@ logger = logging.getLogger(__name__)
 
 
 def return_faker_data() -> list:
-    random_num: int = random.randint(1, 2)
+    random_num: int = random.randint(1, 1000)
     res = requests.get(f"http://192.168.7.52/api/users?count={random_num}")
     res.raise_for_status()
 
