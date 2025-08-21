@@ -107,7 +107,7 @@ Example response from the faker API:
     description="Ingesting fake user data into the fact table",
     schedule="0 1 * * *",  # Daily at midnight
     tags=["daily", "data_ingestion"],
-    defaut_args={"retries": 3, "retry+delay": timedelta(minutes=10)},
+    default_args={"retries": 3, "retry+delay": timedelta(minutes=10)},
 )
 def faker_data_ingestion():
     """DAG to ingest fake user data into a PostgreSQL database."""
