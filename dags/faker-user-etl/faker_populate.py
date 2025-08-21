@@ -128,6 +128,8 @@ def faker_data_ingestion():
             }
         )
 
+        print(df.head())
+
         return df
 
     @task()
