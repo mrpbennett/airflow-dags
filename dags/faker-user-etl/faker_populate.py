@@ -27,7 +27,7 @@ def return_faker_data() -> list:
         raise Exception(f"Failed to fetch faker data: {res.status_code} - {res.text}")
 
     data = res.json()
-    return data["users"]
+    return data["data"]
 
 
 def hash_email(email: str, key: bytes) -> str:
