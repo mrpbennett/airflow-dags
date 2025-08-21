@@ -115,12 +115,9 @@ def faker_data_ingestion():
         """Extract data from the Faker API and return it as a DataFrame."""
         logger.info("Starting data extraction from the Faker API.")
         data = json.dumps(return_faker_data())
-        print(json.dumps(data, indent=4))
         df = pd.read_json(data)
         df = df.drop(columns=["sex", "phone"], errors="ignore")
-        print(df.head(10))
 
-        logger.info("DataFrame columns filtered. Returning DataFrame.")
         return df
 
     @task()
