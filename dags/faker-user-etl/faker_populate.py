@@ -104,7 +104,7 @@ def faker_data_ingestion():
             name="fakerjs",
             con=engine,
             schema="fact",
-            if_exists="fail",
+            if_exists="append",
             index=False,
             method="multi",
             chunksize=1000,
