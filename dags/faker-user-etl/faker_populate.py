@@ -186,7 +186,7 @@ def faker_data_ingestion():
 
         try:
             df.to_sql(
-                name="fakerjs",
+                name="users",  # table_name
                 con=engine,
                 schema="fact",
                 if_exists="append",
