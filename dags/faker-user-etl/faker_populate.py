@@ -160,7 +160,7 @@ def faker_data_ingestion():
             "address",
             "state",
             "ip",
-            "userAgent",
+            "user_agent",
             "ts",
         ]
         missing_columns = [col for col in required_columns if col not in df.columns]
