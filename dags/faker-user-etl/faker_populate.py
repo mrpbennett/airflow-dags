@@ -20,7 +20,9 @@ key = Variable.get("email_hash_key").encode("utf-8")
 
 def return_faker_data() -> list:
     random_num: int = random.randint(1, 1000)
-    res = requests.get(f"http://faker-api.home.local/api/users?count={random_num}")
+    res = requests.get(
+        f"http://faker-express-api-service.fakerjs.svc.cluster.local/api/users?count={random_num}"
+    )
     res.raise_for_status()
 
     if res.status_code != 200:
