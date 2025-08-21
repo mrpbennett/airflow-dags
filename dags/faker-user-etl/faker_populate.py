@@ -12,6 +12,7 @@ import hmac
 import hashlib
 from sqlalchemy import create_engine
 import logging
+from io import StringIO
 
 
 # Common utility functions
@@ -116,7 +117,7 @@ def faker_data_ingestion():
         logger.info("Starting data extraction from the Faker API.")
         data = json.dumps(return_faker_data())
 
-        df = pd.read_json(data)
+        df = pd.read_json(StringIO(data))
         df = df.drop(columns=["sex", "phone"], errors="ignore")
 
         logging.info("Renaming cols to conform to postgres NOT JavaScript")
@@ -128,7 +129,7 @@ def faker_data_ingestion():
             }
         )
 
-        print(df.head())
+        print(df.columns)
 
         return df
 
