@@ -1,3 +1,4 @@
+from datetime import timedelta
 import json
 from requests.sessions import extract_cookies_to_jar
 from airflow.models import Variable
@@ -105,7 +106,8 @@ Example response from the faker API:
     dag_id="faker_data_ingestion",
     description="Ingesting fake user data into the fact table",
     schedule="0 1 * * *",  # Daily at midnight
-    tags=["data_ingestion"],
+    tags=["daily", "data_ingestion"],
+    defaut_args={"retries": 3, "retry+delay": timedelta(minutes=10)},
 )
 def faker_data_ingestion():
     """DAG to ingest fake user data into a PostgreSQL database."""
