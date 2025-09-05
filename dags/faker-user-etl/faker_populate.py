@@ -1,6 +1,5 @@
 from datetime import timedelta
 import json
-from requests.sessions import extract_cookies_to_jar
 from airflow.models import Variable
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.sdk import dag, task
@@ -8,11 +7,13 @@ import pendulum
 import random
 import requests
 import pandas as pd
-import hmac
 import hashlib
 from sqlalchemy import create_engine
 import logging
 from io import StringIO
+
+import hashlib
+import struct
 
 
 # Common utility functions
@@ -52,7 +53,6 @@ def check_table_exists(engine, schema: str, table_name: str):
 
 
 local_tz = pendulum.timezone("Europe/London")
-key = Variable.get("email_hash_key").encode("utf-8")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -73,9 +73,10 @@ def return_faker_data() -> list:
     return data["data"]
 
 
-def hash_email(email: str, key: bytes) -> str:
-    """Hash the email using HMAC with SHA256."""
-    return hmac.new(key, email.lower().encode("utf-8"), hashlib.sha256).hexdigest()
+def hash_email(email: str, salt: str) -> str:
+    hash_object = hashlib.sha256((email + salt).encode("ascii")).digest()
+    number = struct.unpack(">Q", b"/x00" + hash_object[:7])[0]
+    return str(number)
 
 
 """
@@ -138,7 +139,7 @@ def faker_data_ingestion():
         """Hash the email column using the provided key."""
         logger.info("Starting email hashing transformation.")
         df = df.copy()
-        df["email"] = df["email"].apply(lambda x: hash_email(email=x, key=key))
+        df["email"] = df["email"].apply(lambda x: hash_email(email=x, salt="maldon"))
         logger.info("Email hashing completed.")
         return df
 
